@@ -1,0 +1,46 @@
+(async function() {
+  console.log("%cAditszz Eagle Eye EXECUTED!!!", "color: red; font-weight: bold; font-size: 16px;");
+
+  const video = document.querySelector('video');
+
+  // Deteksi video (karena foto bermusik di-render sebagai video)
+  if (!video) {
+    return console.log("%c[GAGAL] Media video/foto bermusik tidak ditemukan!", "color: red");
+  }
+
+  console.log("%c[PROSES] Mengekstrak still frame & melakukan upscale ke 4K...", "color: yellow");
+
+  // 1. Set dimensi paksa ke 4K (2160 x 3840)
+  const width4K = 2160;
+  const height4K = 3840;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width4K;
+  canvas.height = height4K;
+
+  const ctx = canvas.getContext('2d');
+  
+  // 2. Aktifkan algoritma penghalusan piksel tingkat tinggi
+  // (Aman digunakan karena hanya merender 1 frame, bukan 30 fps)
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  // 3. Tarik frame yang sedang tayang dan lukis ulang dalam ukuran 4K
+  ctx.drawImage(video, 0, 0, width4K, height4K);
+
+  // 4. Render hasil akhir menjadi berkas PNG murni
+  canvas.toBlob((blob) => {
+    if (!blob) return console.log("%c[GAGAL] Proses render frame 4K gagal!", "color: red");
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `story_photo_4k_upscaled_${Date.now()}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+    console.log("%c[BERHASIL] Frame berhasil di-upscale dan disimpan sebagai PNG 4K HD!", "color: #00ff00; font-weight: bold;");
+  }, 'image/png');
+})();
